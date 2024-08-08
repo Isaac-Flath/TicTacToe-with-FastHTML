@@ -8,10 +8,8 @@ from fasthtml.common import (
     Script,
     Mount,
     StaticFiles,
-    serve,
     Style,
 )
-from icecream import ic #for debugging, nothing special
 
 style = Style(
     """
@@ -25,13 +23,13 @@ style = Style(
             }"""
 ) # custom style to be applied globally.
 
-tailwind_script = Script(src="https://cdn.tailwindcss.com") 
-local_css_with_tailwind = Link(rel="stylesheet", href="/src/output.css")# to be used as fallback if users are offline.
-script = Script(src="/src/htmx.min.js") # also to be used as fallback, because apparently htmx is a js file access over the internet. I did not know that.
+hdrs = ( Script(src="https://cdn.tailwindcss.com") ,
+        Script(src="https://unpkg.com/htmx.org@2.0.1", integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/", crossorigin="anonymous"),
+        Link(rel="stylesheet", href="/output.css"),
 
+        )
 app, rt = fast_app(
-    routes=[Mount("/src", StaticFiles(directory="src"), name="src")],
-    hdrs=(local_css_with_tailwind, style, script, tailwind_script),
+    hdrs=(hdrs, style),
     pico=False,
     live=True,
 )
@@ -156,7 +154,7 @@ def render_board():
 
 # ---------------------------------------------Main Page --------------------------------------------
 @app.get("/")
-def main():
+def homepage():
     global button_states
     return Div(
         Div(
@@ -190,6 +188,3 @@ def main():
         ),
         cls="justify-center items-center h-screen bg-custom-background",
     )
-
-
-serve()
